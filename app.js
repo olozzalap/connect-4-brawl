@@ -12,18 +12,6 @@ app.use(index);
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const getApiAndEmit = async (socket) => {
-  try {
-    const res = await axios.get(
-      "https://www.omdbapi.com/?apikey=aba065d3&s=interstellar"
-    ); // test query from OMDBAPI
-    console.log(res)
-    socket.emit("socket response", "it's goooooooood!"); // Emitting a new message. It will be consumed by the client
-  } catch (error) {
-    console.error(`Error: ${error.code}`);
-  }
-};
-
 
 let interval;
 io.on("connection", socket => {
@@ -31,11 +19,32 @@ io.on("connection", socket => {
   if (interval) {
     clearInterval(interval);
   }
-  interval = setInterval(() => getApiAndEmit(socket), 3200);
+  interval = setInterval(() => getApiAndEmit(socket), 7000);
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
 });
+
+
+let counter = 1;
+const getApiAndEmit = async (socket) => {
+  try {
+  	counter++;
+  	console.log(counter);
+    const response = await axios.get(
+      "https://www.omdbapi.com/?apikey=aba065d3&s=interstellar"
+    ); // test query from OMDBAPI
+    // console.log(response.data);
+    // console.log(response.status);
+    // console.log(response.statusText);
+    // console.log(response.headers);
+    // console.log(response.config);
+    socket.emit("socketResponse", {"counter": counter, "OMDBResponse": response.data}); // Emitting a new message. It will be consumed by the client
+  } catch (error) {
+  	// console.log(error);
+    console.error(`Error: ${error.code}`);
+  }
+};
 
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
