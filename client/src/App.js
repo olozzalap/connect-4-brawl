@@ -4,42 +4,39 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      response: false,
-      endpoint: "http://127.0.0.1:4001"
+      endpoint: "http://127.0.0.1:4001",
+      user: null,
+      board: null
     };
   }
   componentDidMount() {
     const { endpoint } = this.state;
-    const socket = socketIOClient(endpoint);
-    socket.on("socketResponse", (data) => {
+    this.socket = socketIOClient(endpoint);
+    this.socket.on("newUser", (data) => {
       console.log(data);
-      this.setState({ response: data });
+      this.setState({ user: data });
     });
   }
+  sendMove(boardSpace, event) {
+    console.log(boardSpace);
+    console.log(event);
+    console.log(this.socket);
+    this.socket.emit('moveSent', boardSpace);
+  }
   render() {
-    const { response } = this.state;
+    const { user } = this.state;
     return (
       <div style={{ textAlign: "center" }}>
-        {response ? 
+        {user ? 
           <div>
             <h1>
-              COunting at: {response.counter}
+              {user}
             </h1>
-          
-
-            {response.OMDBResponse.Response === 'True' ? 
-              <div>
-                <h2>We've got {response.OMDBResponse.totalResults} Movies for ya!</h2>
-                <ul>
-                { response.OMDBResponse.Search.map( (movie, index) =>
-                  <li key={movie.imdbID}>#{index} | {movie.Title}</li>
-                )}
-                </ul>
-              </div>
-            : <p>No response!??!?!!</p>}
           </div>
+          : <p>Loading...</p>
+        }
 
-          : <p>Loading...</p>}
+        <button onClick={(e) => this.sendMove([3, 5], e)}>Send yer move@!</button>
       </div>
     );
   }
