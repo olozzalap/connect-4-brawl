@@ -102,7 +102,7 @@ class App extends Component {
   }
 
   render() {
-    const { user, opponent, chats } = this.state;
+    const { user, opponent} = this.state;
     return (
       <div>
         <header>
