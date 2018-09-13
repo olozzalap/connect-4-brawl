@@ -9,7 +9,8 @@ class App extends Component {
       userNameText: '',
       user: null,
       board: null,
-      opponentName: null
+      opponent: null,
+      gameId: null
     };
   }
   componentDidMount() {
@@ -19,18 +20,18 @@ class App extends Component {
       console.log(data);
       this.setState({ user: data });
     });
-    this.socket.on("newGame", (data) => {
-      let opponentName;
+    this.socket.on("updatedBoardState", (data) => {
+      let opponent;
       if (data.users[0].name !== this.state.user.name) {
-        opponentName = data.users[0].name;
+        opponent = data.users[0];
       }
       else if (data.users[1].name !== this.state.user.name) {
-        opponentName = data.users[1].name;
+        opponent = data.users[1];
       }
       else {
         alert("strange we didn't get the opponents username");
       }
-      this.setState({ board: data.boardState, opponentName: opponentName });
+      this.setState({ board: data.boardState, opponent: opponent, gameId: data._id });
       console.log(this.state);
     });
   }
@@ -41,15 +42,51 @@ class App extends Component {
     event.preventDefault();
     this.socket.emit('createUser', this.state.userNameText);
   }
-  sendMove(boardSpace, event) {
-    console.log(boardSpace);
-    console.log(event);
-    console.log(this.socket);
-    this.socket.emit('moveSent', boardSpace);
+  parseBoardMarkup() {
+    console.log("parsing board markup");
+    console.log(this.state.board);
+    let board = []
+
+    for (let i = 0; i < this.state.board.length; i++) {
+      let columnSpaces = []
+      for (let j = 0; j < this.state.board[i].length; j++) {
+        let classes = "board-space ";
+        // console.log(typeof this.state.board[i][j]);
+        // console.log(typeof this.state.user._id);
+        // console.log(typeof this.state.opponent._id);
+        // console.log(String(this.state.board[i][j]));
+        // console.log(this.state.board[i][j] && this.state.board[i][j] === this.state.opponent._id);
+        // console.log(this.state.board[i][j] && this.state.board[i][j] === this.state.user._id);
+        console.log(this.state.user._id);
+        console.log(this.state.opponent.userId);
+        if (this.state.board[i][j] === this.state.user._id) {
+          classes += 'users';
+        }
+        else if (this.state.board[i][j] === this.state.opponent.userId) {
+          classes += 'opponents';
+        }
+        columnSpaces.push(<div className={classes} key={i + ", " + j}></div>)
+      }
+      let columnClasses = "board-column ";
+      // console.log(this.state.board[i].filter( (space) => space === null));
+      if (this.state.board[i].filter( (space) => space === false).length === 0 ) {
+        columnClasses += 'full-column';
+      }
+      board.push(<article className={columnClasses} key={i} onClick={
+        (e) => columnClasses.indexOf('full-column') === -1 ? this.sendMove(i, e) : null}>
+          {columnSpaces}
+        </article>);
+    }
+    return board
+  }
+  sendMove(columnIndex, event) {
+    console.log(columnIndex);
+
+    this.socket.emit('sendMove', {columnIndex: columnIndex, gameId: this.state.gameId, userId: this.state.user._id});
   }
 
   render() {
-    const { user, board, opponentName } = this.state;
+    const { user, opponent } = this.state;
     return (
       <div>
         <header>
@@ -61,12 +98,17 @@ class App extends Component {
               <h2>
                 Hello {user.name}, good luck!
               </h2>
-              {opponentName ? 
+              {opponent ? 
                 <div>
-                  <p>Your opponent is {opponentName}</p>
-                  <button onClick={(e) => this.sendMove([3, 5], e)}>Send yer move@!</button>
+                  {opponent.isTurn ?
+                    <p>Waiting on {opponent.name} to make a move!</p>
+                  : <p>Your opponent is {opponent.name}</p>}
+
+                  <section className={(opponent.isTurn) ? 'board opponents-turn' : 'board'}>
+                    {this.parseBoardMarkup()}
+                  </section>
                 </div>
-                : <h3> Waiting for an opponet, prepare for the brawl</h3>
+                : <h3> Waiting for an opponent, prepare for the brawl</h3>
               }
             </div>
             :  <form onSubmit={(e) => this.createUser(e)}>

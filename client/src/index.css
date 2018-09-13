@@ -8,30 +8,58 @@ body {
 }
 h1, h2, h3 {
 	font-family: 'Chicle', cursive;
+	letter-spacing: 1.2px;
+}
+h1 {
+	font-size: 47px;
+	margin: 0;
 }
 
 header {
-  padding: 10px 5%;
+  padding: 12px 5%;
   background-color: rgba(240, 230, 248, .5);
 }
 main {
-	padding: 5%;
+	padding: 0 4% 50px;
   text-align: center;
 }
 
 .board {
+	box-sizing: border-box;
 	border-radius: 12px;
 	border: 4px solid rgba(49, 147, 248, .8);
+	clear: both;
+	height: 71vw;
+	min-height: 450px;
+	position: relative;
+}
+.board.opponents-turn:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(240, 230, 248, .8);
+	z-index: 9999;
+
 }
 .board-column {
+	box-sizing: border-box;
 	/* 100%  / 7 */
 	width: 14.2857%;
+	height: 100%;
+	float: left;
 }
 .board-space {
+	box-sizing: border-box;
+	width: 100%;
+	/* 100%  / 6 */
+	height: 16.6666%;
 	border-radius: 30%;
 	border: 7px solid rgba(49, 147, 248, .8);
 }
-.board-space.yours {
+.board-space.users {
 	background-color: green;
 }
 .board-space.opponents {

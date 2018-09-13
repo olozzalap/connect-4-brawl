@@ -22,6 +22,7 @@ mongoose.connect(db)
 	.catch((err) => console.log(err))
 
 let usersQueue = [];
+let playingUsersPool = [];
 let totalUsersCount = 0;
 let interval;
 
@@ -32,7 +33,6 @@ io.on("connection", socket => {
     clearInterval(interval);
   }
   interval = setInterval(() => {
-  	console.log(usersQueue.length);
   	if (usersQueue.length > 1) {
   		while(usersQueue.length > 1) {
   			let user1 = usersQueue.shift();
@@ -47,9 +47,10 @@ io.on("connection", socket => {
     console.log(data);
     createNewUser(socket, data);
   });
-  socket.on("moveSent", async (data) => {
+  socket.on("sendMove", async (data) => {
     console.log("move sent");
     console.log(data);
+    sendMove(data);
   });
 
   socket.on("disconnect", () => {
@@ -82,19 +83,58 @@ const createNewGame = async (user1, user2) => {
     const newGame = new Game({
     	users: [{
     		name: user1.user.name,
-    		userId: user1.user._id
+    		userId: user1.user._id,
+    		isTurn: false
     	}, {
     		name: user2.user.name,
-    		userId: user2.user._id
+    		userId: user2.user._id,
+    		isTurn: true
     	}]
     });
+    console.log(newGame.users);
     newGame.save().then(async (game) => {
-    	console.log(game);
-    	user1.socket.emit("newGame", game);
-    	user2.socket.emit("newGame", game);
+    	console.log(game.users);
+    	user1.socket.emit("updatedBoardState", game);
+    	user2.socket.emit("updatedBoardState", game);
     	console.log("usersQueue is now at: " + usersQueue.length);
+    	playingUsersPool.push(user1);
+    	playingUsersPool.push(user2);
     })
   } catch (error) {
     console.error(`Error: ${error.code}`);
   }
 };
+const sendMove = async(data) => {
+	Game.findById(data.gameId, (err, game) => {
+		if (game.boardState[data.columnIndex].filter((space) => space === false).length === 0) {
+			console.error("This column has no available spaces!");
+		}
+		let topAvailableSpace;
+		for (let i = 0; i < game.boardState[data.columnIndex].length; i++) {
+			if (game.boardState[data.columnIndex][i] !== false) {
+				topAvailableSpace = i - 1;
+				break;
+			}
+			else if (i === game.boardState[data.columnIndex].length - 1) {
+				topAvailableSpace = i;
+			}
+		}
+		console.log(topAvailableSpace);
+		game.boardState[data.columnIndex][topAvailableSpace] = String(data.userId);
+		console.log(game.boardState[data.columnIndex][topAvailableSpace]);
+		game.users[0].isTurn = !game.users[0].isTurn;
+		game.users[1].isTurn = !game.users[1].isTurn;
+
+		game.save().then(async (savedGame) => {
+			let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[0].userId.toString());
+			let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[1].userId.toString());
+			if (user1InPool.length === 1 && user2InPool.length === 1) {
+				user1InPool[0].socket.emit("updatedBoardState", savedGame);
+				user2InPool[0].socket.emit("updatedBoardState", savedGame);
+			}
+			else {
+				console.error("cant match users to their socket, strange");
+			}
+		})
+	})
+}
