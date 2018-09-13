@@ -109,14 +109,18 @@ const createNewGame = async (user1, user2) => {
     console.error(`Error: ${error.code}`);
   }
 };
-const sendMove = async(data) => {
-	Game.findById(data.gameId, (err, game) => {
+const sendMove = (data) => {
+	Game.findById(data.gameId, (err, gameObj) => {
+		let game = new Game(gameObj);
 		if (game.boardState[data.columnIndex].filter((space) => space === false).length === 0) {
 			console.error("This column has no available spaces!");
 		}
 		let topAvailableSpace;
+		console.log(game.boardState[data.columnIndex]);
 		for (let i = 0; i < game.boardState[data.columnIndex].length; i++) {
+			console.log(game.boardState[data.columnIndex][i]);
 			if (game.boardState[data.columnIndex][i] !== false) {
+				console.log("topAvailableSpace is: "+ topAvailableSpace);
 				topAvailableSpace = i - 1;
 				break;
 			}
@@ -125,22 +129,26 @@ const sendMove = async(data) => {
 			}
 		}
 		console.log(topAvailableSpace);
-		game.boardState[data.columnIndex][topAvailableSpace] = String(data.userId);
-		console.log(game.boardState[data.columnIndex][topAvailableSpace]);
+		game.boardState[data.columnIndex][topAvailableSpace] = data.userId.toString();
+		// console.log(game.boardState[data.columnIndex][topAvailableSpace]);
 		game.users[0].isTurn = !game.users[0].isTurn;
 		game.users[1].isTurn = !game.users[1].isTurn;
+		console.log(game.boardState[data.columnIndex]);
 
-		game.save().then(async (savedGame) => {
-			let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[0].userId.toString());
-			let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[1].userId.toString());
+		game.save((err, savedGame) => {
+			console.log(err);
+			console.log(savedGame);
+			console.log(savedGame.boardState[data.columnIndex]);
+			let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === savedGame.users[0].userId.toString());
+			let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === savedGame.users[1].userId.toString());
 			if (user1InPool.length === 1 && user2InPool.length === 1) {
 				user1InPool[0].socket.emit("updatedBoardState", savedGame);
-				user2InPool[0].socket.emit("updatedBoardState", savedGame);
+				user2InPool[0].socket.emit("updatedBoardState", game);
 			}
 			else {
 				console.error("cant match users to their socket, strange");
 			}
-		})
+		});
 	})
 };
 const sendChat = async(data) => {
