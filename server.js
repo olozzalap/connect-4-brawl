@@ -52,6 +52,11 @@ io.on("connection", socket => {
     console.log(data);
     sendMove(data);
   });
+  socket.on("sendChat", async (data) => {
+    console.log("chat sent");
+    console.log(data);
+    sendChat(data);
+  });
 
   socket.on("disconnect", () => {
     console.log("Client disconnected");
@@ -137,4 +142,18 @@ const sendMove = async(data) => {
 			}
 		})
 	})
+};
+const sendChat = async(data) => {
+	console.log(data);
+	Game.findById(data.gameId, (err, game) => {
+		let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[0].userId.toString());
+		let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[1].userId.toString());
+		if (user1InPool.length === 1 && user2InPool.length === 1) {
+			user1InPool[0].socket.emit("newChat", data);
+			user2InPool[0].socket.emit("newChat", data);
+		}
+		else {
+			console.error("cant match users to their socket, strange");
+		}
+	});
 }
