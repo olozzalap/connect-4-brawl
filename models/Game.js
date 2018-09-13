@@ -17,8 +17,11 @@ const GameSchema = new Schema({
 			[null, null, null, null, null, null]
 		]
 	},
-	users: [ {type: Schema.ObjectId, ref: 'User'} ],
-	winner: {type: Schema.ObjectId, ref: 'User'},
+	users: [ {
+		name: {type: String},
+		userId: {type: Schema.Types.ObjectId, ref: 'User'} 
+	}],
+	winner: {type: Schema.Types.ObjectId, ref: 'User'},
 	createdAt: {
 		type: Date,
 		default: Date.now()

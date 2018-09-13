@@ -23,27 +23,26 @@ mongoose.connect(db)
 
 let usersQueue = [];
 let totalUsersCount = 0;
-
 let interval;
+
 io.on("connection", socket => {
   console.log("client connected!");
-
+  // Periodic check to spawn new games from the usersQueue
   if (interval) {
-	  clearInterval(interval);
-	}
-	interval = setInterval(() => {
-		if (usersQueue.length > 1) {
-			while(usersQueue.length > 1) {
-				console.log(usersQueue.length);
-				let user1 = usersQueue.shift();
-				let user2 = usersQueue.shift();
-				console.log(usersQueue.length);
-				createNewGame(socket, user1, user2);
-			}
-		}
-	}, 3000);
+    clearInterval(interval);
+  }
+  interval = setInterval(() => {
+  	console.log(usersQueue.length);
+  	if (usersQueue.length > 1) {
+  		while(usersQueue.length > 1) {
+  			let user1 = usersQueue.shift();
+  			let user2 = usersQueue.shift();
+  			createNewGame(user1, user2);
+  		}
+  	}
+  }, 3000);
 
-  socket.on("userSubmit", async (data) => {
+  socket.on("createUser", async (data) => {
     console.log("user submitted");
     console.log(data);
     createNewUser(socket, data);
@@ -66,7 +65,10 @@ const createNewUser = async (socket, data) => {
     });
     newUser.save().then(user => {
     	socket.emit("userCreated", user);
-    	usersQueue.push(user);
+    	usersQueue.push({
+    		user: user,
+    		socket: socket
+    	});
     	totalUsersCount++;
     	console.log("created new user #" + totalUsersCount + " | " + user.name);
     	console.log("usersQueue is now at: " + usersQueue.length);
@@ -75,23 +77,21 @@ const createNewUser = async (socket, data) => {
     console.error(`Error: ${error.code}`);
   }
 };
-const createNewGame = async (socket, user1, user2) => {
+const createNewGame = async (user1, user2) => {
   try {
     const newGame = new Game({
-    	users: [user1, user2]
+    	users: [{
+    		name: user1.user.name,
+    		userId: user1.user._id
+    	}, {
+    		name: user2.user.name,
+    		userId: user2.user._id
+    	}]
     });
     newGame.save().then(async (game) => {
-    	console.log(game._id);
-    	Game.
-    	  findOne({ id: game._id }).
-    	  populate('users').
-    	  exec(function (err, populatedGame) {
-    	    console.log(populatedGame);
-    	    // prints "The author is Ian Fleming"
-    	  });
-
-    	socket.emit("newGame", game);
-    	console.log("created new game: " + game.id);
+    	console.log(game);
+    	user1.socket.emit("newGame", game);
+    	user2.socket.emit("newGame", game);
     	console.log("usersQueue is now at: " + usersQueue.length);
     })
   } catch (error) {

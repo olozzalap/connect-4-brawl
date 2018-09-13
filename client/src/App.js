@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import socketIOClient from "socket.io-client";
+
 class App extends Component {
   constructor() {
     super();
@@ -19,13 +20,12 @@ class App extends Component {
       this.setState({ user: data });
     });
     this.socket.on("newGame", (data) => {
-      console.log(data);
       let opponentName;
       if (data.users[0].name !== this.state.user.name) {
-        opponentName = data.users[0].name
+        opponentName = data.users[0].name;
       }
       else if (data.users[1].name !== this.state.user.name) {
-        opponentName = data.users[1].name 
+        opponentName = data.users[1].name;
       }
       else {
         alert("strange we didn't get the opponents username");
@@ -35,13 +35,11 @@ class App extends Component {
     });
   }
   updateUserNameText(event) {
-    console.log(event.target.value);
     this.setState({userNameText: event.target.value});
   }
-  submitUser(event) {
-    console.log('A name was submitted: ' + this.state.userNameText);
+  createUser(event) {
     event.preventDefault();
-    this.socket.emit('userSubmit', this.state.userNameText);
+    this.socket.emit('createUser', this.state.userNameText);
   }
   sendMove(boardSpace, event) {
     console.log(boardSpace);
@@ -51,20 +49,27 @@ class App extends Component {
   }
 
   render() {
-    const { user, board } = this.state;
+    const { user, board, opponentName } = this.state;
     return (
       <div>
         <header>
-          <h1>Connect-4 Brawl</h1>
+          <h1>CONNECT4 Brawl</h1>
         </header>
         <main>
           {user ? 
             <div>
-              <p>
-                {user.name}
-              </p>
+              <h2>
+                Hello {user.name}, good luck!
+              </h2>
+              {opponentName ? 
+                <div>
+                  <p>Your opponent is {opponentName}</p>
+                  <button onClick={(e) => this.sendMove([3, 5], e)}>Send yer move@!</button>
+                </div>
+                : <h3> Waiting for an opponet, prepare for the brawl</h3>
+              }
             </div>
-            :  <form onSubmit={(e) => this.submitUser(e)}>
+            :  <form onSubmit={(e) => this.createUser(e)}>
                 <label>
                   Enter your name for the Brawl!:
                   <input type="text" value={this.state.userNameText} onChange={(e) => this.updateUserNameText(e)} />
@@ -72,8 +77,6 @@ class App extends Component {
                 <input type="submit" value="Submit" />
               </form>
           }
-
-          <button onClick={(e) => this.sendMove([3, 5], e)}>Send yer move@!</button>
         </main>
       </div>
     );
