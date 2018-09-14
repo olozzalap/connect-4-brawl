@@ -171,7 +171,7 @@ const sendMove = (data) => {
 			}
 
 			game.save((err, savedGame) => {
-				console.log(savedGame.boardState[data.columnIndex]);
+				console.log(savedGame.users);
 				let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === savedGame.users[0].userId.toString());
 				let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === savedGame.users[1].userId.toString());
 				if (user1InPool.length === 1 && user2InPool.length === 1) {
@@ -227,7 +227,9 @@ const checkWinCondition = (boardState, colIndex, rowIndex) => {
   }
 }
 const checkAdjacentSpace = (boardState, colIndex, rowIndex, colInc, rowInc) => {
-  if(
+	console.log(colIndex, rowIndex, colInc, rowInc);
+  if( boardState[colIndex] && boardState[colIndex+colInc] &&
+  	boardState[colIndex][rowIndex] && boardState[colIndex+colInc][rowIndex+rowInc] &&
   	boardState[colIndex][rowIndex] === boardState[colIndex+colInc][rowIndex+rowInc]
   ){
     return 1 + checkAdjacentSpace(boardState, colIndex+colInc, rowIndex+rowInc, colInc, rowInc);

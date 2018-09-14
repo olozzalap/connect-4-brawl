@@ -24,29 +24,26 @@ class App extends Component {
       this.setState({ user: data });
     });
     this.socket.on("updatedBoardState", (data) => {
-      this.setState({ board: data.boardState});
-      if (this.state.opponent === null || this.state.gameId === null) {
-        let opponent;
-        if (data.users[0].name !== this.state.user.name) {
-          opponent = data.users[0];
-        }
-        else if (data.users[1].name !== this.state.user.name) {
-          opponent = data.users[1];
-        }
-        else {
-          alert("strange we didn't get the opponents username");
-        }
-        this.setState({ opponent: opponent, gameId: data._id });
+      let opponent;
+      if (data.users[0].name !== this.state.user.name) {
+        opponent = data.users[0];
       }
-      else if (data.winner && data.winner._id) {
-        if (data.winner._id === this.state.user_id) {
+      else if (data.users[1].name !== this.state.user.name) {
+        opponent = data.users[1];
+      }
+      else {
+        alert("strange we didn't get the opponents username");
+      }
+      this.setState({ board: data.boardState, opponent: opponent, gameId: data._id });
+
+      if (data.winner) {
+        if (data.winner === this.state.user_id) {
           this.setState({userWon: true});   
         }
         else {
           this.setState({userWon: false});
         }
       }
-      console.log(this.state);
     });
     this.socket.on("newChat", (data) => {
       console.log(data);
@@ -145,7 +142,8 @@ class App extends Component {
                         Ready for a new match?
                       </button>
                     </div>
-                  userWon === false ?
+                  : ""}
+                  {userWon === false ?
                     <div>
                       <h1>You've lost the brawl, dang!</h1>
                       <button onClick={(e) => this.newMatch(e)}>
@@ -159,15 +157,17 @@ class App extends Component {
                   </section>
 
                   <aside className="chat">
-                    <h2>Chat</h2>
-                    {this.parseChats()}
-                    <form onSubmit={(e) => this.sendChat(e)}>
-                      <label>
-                        Chat with {opponent.name}
-                        <textarea value={this.state.chatText} onChange={(e) => this.updateChatText(e)} ></textarea>
-                      </label>
-                      <input type="submit" value="Submit" />
-                    </form>
+                    <div className="chat-inner">
+                      <h2>Chat</h2>
+                      {this.parseChats()}
+                      <form onSubmit={(e) => this.sendChat(e)}>
+                        <label>
+                          Chat with {opponent.name}
+                          <textarea value={this.state.chatText} onChange={(e) => this.updateChatText(e)} ></textarea>
+                        </label>
+                        <input type="submit" value="Submit" />
+                      </form>
+                    </div>
                   </aside>
                 </div>
                 : <h3> Waiting for an opponent, prepare for the brawl</h3>
