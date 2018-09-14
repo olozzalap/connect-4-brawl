@@ -9,6 +9,7 @@ class App extends Component {
       userNameText: '',
       chatText: '',
       user: null,
+      userWon: null,
       board: null,
       opponent: null,
       gameId: null,
@@ -23,17 +24,28 @@ class App extends Component {
       this.setState({ user: data });
     });
     this.socket.on("updatedBoardState", (data) => {
-      let opponent;
-      if (data.users[0].name !== this.state.user.name) {
-        opponent = data.users[0];
+      this.setState({ board: data.boardState});
+      if (this.state.opponent === null || this.state.gameId === null) {
+        let opponent;
+        if (data.users[0].name !== this.state.user.name) {
+          opponent = data.users[0];
+        }
+        else if (data.users[1].name !== this.state.user.name) {
+          opponent = data.users[1];
+        }
+        else {
+          alert("strange we didn't get the opponents username");
+        }
+        this.setState({ opponent: opponent, gameId: data._id });
       }
-      else if (data.users[1].name !== this.state.user.name) {
-        opponent = data.users[1];
+      else if (data.winner && data.winner._id) {
+        if (data.winner._id === this.state.user_id) {
+          this.setState({userWon: true});   
+        }
+        else {
+          this.setState({userWon: false});
+        }
       }
-      else {
-        alert("strange we didn't get the opponents username");
-      }
-      this.setState({ board: data.boardState, opponent: opponent, gameId: data._id });
       console.log(this.state);
     });
     this.socket.on("newChat", (data) => {
@@ -100,9 +112,15 @@ class App extends Component {
     this.socket.emit('sendChat', {text: this.state.chatText, userId: this.state.user._id, gameId: this.state.gameId}); 
     this.setState({chatText: ""});
   }
+  newMatch(event) {
+    event.preventDefault();
+    this.socket.emit('newMatch', {user: this.state.user});
+    this.setState({opponent: null, userWon: null, board: null, chats: null, gameId: null});
+  }
+
 
   render() {
-    const { user, opponent} = this.state;
+    const { user, opponent, userWon} = this.state;
     return (
       <div>
         <header>
@@ -120,7 +138,23 @@ class App extends Component {
                     <p>Waiting on {opponent.name} to make a move!</p>
                   : <p>Your opponent is {opponent.name}</p>}
 
-                  <section className={(opponent.isTurn) ? 'board opponents-turn' : 'board'}>
+                  {userWon === true ?
+                    <div>
+                      <h1>You've won, great job!</h1>
+                      <button onClick={(e) => this.newMatch(e)}>
+                        Ready for a new match?
+                      </button>
+                    </div>
+                  userWon === false ?
+                    <div>
+                      <h1>You've lost the brawl, dang!</h1>
+                      <button onClick={(e) => this.newMatch(e)}>
+                        Redemption?
+                      </button>
+                    </div>
+                  : ""}
+
+                  <section className={(opponent.isTurn || userWon === true || userWon === false) ? 'board grayed-out' : 'board'}>
                     {this.parseBoardMarkup()}
                   </section>
 

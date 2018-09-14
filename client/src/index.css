@@ -33,7 +33,7 @@ main {
 	min-height: 450px;
 	position: relative;
 }
-.board.opponents-turn:before {
+.board.grayed-out:before {
 	content: "";
 	position: absolute;
 	top: 0;
