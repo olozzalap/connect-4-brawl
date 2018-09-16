@@ -53,6 +53,12 @@ class App extends Component {
       this.setState({ chats: newChats});
       console.log(this.state.chats);
     });
+    this.socket.on("gameReset", (data) => {
+      this.newMatch();
+    });
+  }
+  componentWillUnmount() {
+    this.socket.emit('disconnect', {gameId: this.state.gameId, userId: this.state.user._id});
   }
   updateUserNameText(event) {
     this.setState({userNameText: event.target.value});
@@ -112,7 +118,7 @@ class App extends Component {
   newMatch(event) {
     event.preventDefault();
     this.socket.emit('newMatch', {user: this.state.user});
-    this.setState({opponent: null, userWon: null, board: null, chats: null, gameId: null});
+    this.setState({opponent: null, userWon: null, board: null, chats: [], gameId: null});
   }
 
 
@@ -155,7 +161,7 @@ class App extends Component {
                   <form onSubmit={(e) => this.sendChat(e)}>
                     <label>
                       Chat with {opponent.name}
-                      <textarea value={this.state.chatText} onChange={(e) => this.updateChatText(e)} ></textarea>
+                      <input type="text" value={this.state.chatText} onChange={(e) => this.updateChatText(e)} />
                     </label>
                     <input type="submit" value="Submit" />
                   </form>

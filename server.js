@@ -39,7 +39,7 @@ io.on("connection", socket => {
   			createNewGame(user1, user2);
   		}
   	}
-  }, 3000);
+  }, 1800);
 
   socket.on("createUser", async (data) => {
     console.log("user submitted");
@@ -48,7 +48,7 @@ io.on("connection", socket => {
   });
   socket.on("sendMove", async (data) => {
     console.log("move sent");
-    console.log(data);
+    // console.log(data);
     sendMove(data);
   });
   socket.on("sendChat", async (data) => {
@@ -70,6 +70,15 @@ io.on("connection", socket => {
     if (sendingUserInPool[0]) {
     	console.log("playingUsersPool was at: " + playingUsersPool.length);
     	playingUsersPool.splice(playingUsersPool.indexOf(sendingUserInPool[0]), 1);
+    	let usersOpponentInPool = playingUsersPool.filter( (user) => user.user._id === sendingUserInPool[0].opponentId);
+    	if (usersOpponentInPool[0]) {
+    		usersOpponentInPool[0].socket.emit("newChat", {userId: "admin", text: "Your opponent left the match so you win by forfeit. We automatically added you back to the queue for the next match"});
+    		usersQueue.push({
+    			user: usersOpponentInPool[0].user,
+    			socket: usersOpponentInPool[0].socket
+    		});
+    		playingUsersPool.splice(playingUsersPool.indexOf(usersOpponentInPool[0]), 1);
+    	}
     	console.log("playingUsersPool now is at: " + playingUsersPool.length);
     }
     let sendingUserInQueue = usersQueue.filter( (user) => user.socket === socket);
@@ -118,6 +127,8 @@ const createNewGame = async (user1, user2) => {
     	user1.socket.emit("updatedBoardState", game);
     	user2.socket.emit("updatedBoardState", game);
     	console.log("usersQueue is now at: " + usersQueue.length);
+    	user1.opponentId = user2.user._id;
+    	user2.opponentId = user1.user._id;
     	playingUsersPool.push(user1);
     	playingUsersPool.push(user2);
     })
@@ -136,11 +147,9 @@ const sendMove = (data) => {
 				return false;
 			}
 			let topAvailableRowIndex;
-			console.log(game.boardState[data.columnIndex]);
 			for (let i = 0; i < game.boardState[data.columnIndex].length; i++) {
-				// console.log(game.boardState[data.columnIndex][i]);
 				if (game.boardState[data.columnIndex][i] !== false) {
-					console.log("topAvailableRowIndex is: "+ topAvailableRowIndex);
+					// console.log("topAvailableRowIndex is: "+ topAvailableRowIndex);
 					topAvailableRowIndex = i - 1;
 					break;
 				}
@@ -149,14 +158,14 @@ const sendMove = (data) => {
 				}
 			}
 			console.log(data.columnIndex, topAvailableRowIndex);
-			console.log(game.boardState[data.columnIndex]);
 			game.boardState[data.columnIndex][topAvailableRowIndex] = data.userId.toString();
 			// Now that the boardState is updated let's see if that was a winning move
 			if (checkWinCondition(game.boardState, data.columnIndex, topAvailableRowIndex) === true) {
 				game.winner = data.userId.toString();
+				console.log("WINNNNAR");
 				console.log(game.winner);
 			}
-			// Checks through all game spaces to see if anyre still false, otherwise all spaces are taken and its a draw!
+			// Checks through all game spaces to see if any are still false, otherwise all spaces are taken and its a draw!
 			else if (JSON.stringify(game.boardState.map((object, i) => 
 					game.boardState[i].filter((space) => space === false).length === 0)
 				) === JSON.stringify([true, true, true, true, true, true, true])
@@ -165,13 +174,11 @@ const sendMove = (data) => {
 				game.winner = "DRAW";
 			}
 			else {
-				console.log("That move was not a winner, keep this game going");
 				game.users[0].isTurn = !game.users[0].isTurn;
 				game.users[1].isTurn = !game.users[1].isTurn;
 			}
 
 			game.save((err, savedGame) => {
-				console.log(savedGame.users);
 				let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === savedGame.users[0].userId.toString());
 				let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === savedGame.users[1].userId.toString());
 				if (user1InPool.length === 1 && user2InPool.length === 1) {
@@ -227,11 +234,13 @@ const checkWinCondition = (boardState, colIndex, rowIndex) => {
   }
 }
 const checkAdjacentSpace = (boardState, colIndex, rowIndex, colInc, rowInc) => {
-	console.log(colIndex, rowIndex, colInc, rowInc);
   if( boardState[colIndex] && boardState[colIndex+colInc] &&
   	boardState[colIndex][rowIndex] && boardState[colIndex+colInc][rowIndex+rowInc] &&
   	boardState[colIndex][rowIndex] === boardState[colIndex+colInc][rowIndex+rowInc]
   ){
+  	console.log(colIndex, rowIndex);
+  	console.log(" matches with: ");
+  	console.log(colIndex+colInc, rowIndex+rowInc);
     return 1 + checkAdjacentSpace(boardState, colIndex+colInc, rowIndex+rowInc, colInc, rowInc);
   } else {
     return 0;
