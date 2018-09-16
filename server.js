@@ -26,7 +26,6 @@ let totalUsersCount = 0;
 let interval;
 
 io.on("connection", socket => {
-  console.log("client connected!");
   // Periodic check to spawn new games from the usersQueue. Also maintains the userObj.coket by pushing it into playingUsersPool
   if (interval) {
     clearInterval(interval);
@@ -42,18 +41,13 @@ io.on("connection", socket => {
   }, 1800);
 
   socket.on("createUser", async (data) => {
-    console.log("user submitted");
-    console.log(data);
+    console.log("New user created");
     createNewUser(socket, data);
   });
   socket.on("sendMove", async (data) => {
-    console.log("move sent");
-    // console.log(data);
     sendMove(data);
   });
   socket.on("sendChat", async (data) => {
-    console.log("chat sent");
-    console.log(data);
     sendChat(data);
   });
   socket.on("newMatch", async (data) => {
@@ -65,22 +59,20 @@ io.on("connection", socket => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
     let sendingUserInPool = playingUsersPool.filter( (user) => user.socket === socket);
     if (sendingUserInPool[0]) {
-    	console.log("playingUsersPool was at: " + playingUsersPool.length);
     	playingUsersPool.splice(playingUsersPool.indexOf(sendingUserInPool[0]), 1);
     	let usersOpponentInPool = playingUsersPool.filter( (user) => user.user._id === sendingUserInPool[0].opponentId);
+    	// Gracefully send a message to the disconnected users opponent and then reset them back to waiting for an opponent after 4 seconds
     	if (usersOpponentInPool[0]) {
     		usersOpponentInPool[0].socket.emit("newChat", {userId: "admin", text: "Your opponent left the match so you win by forfeit. We automatically added you back to the queue for the next match"});
-    		setTimeout(() => usersOpponentInPool[0].socket.emit("gameReset"), 3000)
+    		setTimeout(() => usersOpponentInPool[0].socket.emit("gameReset"), 4000)
     		playingUsersPool.splice(playingUsersPool.indexOf(usersOpponentInPool[0]), 1);
     	}
     	console.log("playingUsersPool now is at: " + playingUsersPool.length);
     }
     let sendingUserInQueue = usersQueue.filter( (user) => user.socket === socket);
     if (sendingUserInQueue[0]) {
-    	console.log("usersQueue was at: " + usersQueue.length);
     	usersQueue.splice(usersQueue.indexOf(sendingUserInQueue[0]), 1);
     	console.log("usersQueue now is at: " + usersQueue.length);
     }
@@ -100,8 +92,7 @@ const createNewUser = async (socket, data) => {
     		socket: socket
     	});
     	totalUsersCount++;
-    	console.log("created new user #" + totalUsersCount + " | " + user.name);
-    	console.log("usersQueue is now at: " + usersQueue.length);
+    	console.log("created new user #" + totalUsersCount + " | " + user.name + ". usersQueue is now at: " + usersQueue.length);
     })
   } catch (error) {
     console.error(`Error: ${error.code}`);
@@ -146,7 +137,6 @@ const sendMove = (data) => {
 			let topAvailableRowIndex;
 			for (let i = 0; i < game.boardState[data.columnIndex].length; i++) {
 				if (game.boardState[data.columnIndex][i] !== false) {
-					// console.log("topAvailableRowIndex is: "+ topAvailableRowIndex);
 					topAvailableRowIndex = i - 1;
 					break;
 				}
@@ -154,13 +144,12 @@ const sendMove = (data) => {
 					topAvailableRowIndex = i;
 				}
 			}
-			console.log(data.columnIndex, topAvailableRowIndex);
+			// Update the board state with the users id
 			game.boardState[data.columnIndex][topAvailableRowIndex] = data.userId.toString();
 			// Now that the boardState is updated let's see if that was a winning move
 			if (checkWinCondition(game.boardState, data.columnIndex, topAvailableRowIndex) === true) {
 				game.winner = data.userId.toString();
-				console.log("WINNNNAR");
-				console.log(game.winner);
+				console.log(data.userId + " is the game winner!");
 			}
 			// Checks through all game spaces to see if any are still false, otherwise all spaces are taken and its a draw!
 			else if (JSON.stringify(game.boardState.map((object, i) => 
@@ -196,7 +185,6 @@ const sendMove = (data) => {
 	}
 };
 const sendChat = async(data) => {
-	console.log(data);
 	Game.findById(data.gameId, (err, game) => {
 		let user1InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[0].userId.toString());
 		let user2InPool = playingUsersPool.filter( (user) => user.user._id.toString() === game.users[1].userId.toString());
@@ -235,9 +223,9 @@ const checkAdjacentSpace = (boardState, colIndex, rowIndex, colInc, rowInc) => {
   	boardState[colIndex][rowIndex] && boardState[colIndex+colInc][rowIndex+rowInc] &&
   	boardState[colIndex][rowIndex] === boardState[colIndex+colInc][rowIndex+rowInc]
   ){
-  	console.log(colIndex, rowIndex);
-  	console.log(" matches with: ");
-  	console.log(colIndex+colInc, rowIndex+rowInc);
+  	// console.log(colIndex, rowIndex);
+  	// console.log(" matches with: ");
+  	// console.log(colIndex+colInc, rowIndex+rowInc);
     return 1 + checkAdjacentSpace(boardState, colIndex+colInc, rowIndex+rowInc, colInc, rowInc);
   } else {
     return 0;

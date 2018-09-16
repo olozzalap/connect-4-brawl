@@ -44,8 +44,11 @@ class App extends Component {
           alert("You have won, congrats!");
           this.setState({userWon: true});   
         }
+        if (data.winner === "DRAW") {
+          alert("Looks like its a draw here folks.");
+        }
         else {
-          alert("You have lost to " + this.state.opponent.name);
+          alert("You have lost to " + this.state.opponent.name + "...");
           this.setState({userWon: false});
         }
       }
@@ -151,12 +154,19 @@ class App extends Component {
               </button>
             </div>
             : ""}
+            {userWon === "DRAW" ? <div>
+              <h1>Wow, it's a draw!</h1>
+              <button onClick={(e) => this.newMatch(e)}>
+                Fresh game?
+              </button>
+            </div>
+            : ""}
             {userWon === null ? <h2>Hello {user.name}, good luck!</h2>
             : ""}
             {opponent ? <div>
                 {opponent.isTurn ? <p>Waiting on {opponent.name} to make a move!</p>
                 : <p>Your opponent is {opponent.name}</p>}
-              <section className={(opponent.isTurn || userWon === true || userWon === false) ? 'board grayed-out' : 'board'}>
+              <section className={(opponent.isTurn || userWon === true || userWon === false || userWon === "DRAW") ? 'board grayed-out' : 'board'}>
                 {this.parseBoardMarkup()}
               </section>
 
