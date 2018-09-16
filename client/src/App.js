@@ -37,10 +37,15 @@ class App extends Component {
       this.setState({ board: data.boardState, opponent: opponent, gameId: data._id });
 
       if (data.winner) {
-        if (data.winner === this.state.user_id) {
+        console.log("we have a winner!!!!!!!!!!!!");
+        console.log("Winner is: " + data.winner);
+        console.log("You are: " + this.state.user._id);
+        if (data.winner === this.state.user._id) {
+          alert("You have won, congrats!");
           this.setState({userWon: true});   
         }
         else {
+          alert("You have lost to " + this.state.opponent.name);
           this.setState({userWon: false});
         }
       }
@@ -54,6 +59,7 @@ class App extends Component {
       console.log(this.state.chats);
     });
     this.socket.on("gameReset", (data) => {
+      console.log("Resetting game");
       this.newMatch();
     });
   }
@@ -116,7 +122,7 @@ class App extends Component {
     this.setState({chatText: ""});
   }
   newMatch(event) {
-    event.preventDefault();
+    (event) ? event.preventDefault() : null;
     this.socket.emit('newMatch', {user: this.state.user});
     this.setState({opponent: null, userWon: null, board: null, chats: [], gameId: null});
   }

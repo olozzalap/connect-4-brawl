@@ -73,10 +73,7 @@ io.on("connection", socket => {
     	let usersOpponentInPool = playingUsersPool.filter( (user) => user.user._id === sendingUserInPool[0].opponentId);
     	if (usersOpponentInPool[0]) {
     		usersOpponentInPool[0].socket.emit("newChat", {userId: "admin", text: "Your opponent left the match so you win by forfeit. We automatically added you back to the queue for the next match"});
-    		usersQueue.push({
-    			user: usersOpponentInPool[0].user,
-    			socket: usersOpponentInPool[0].socket
-    		});
+    		setTimeout(() => usersOpponentInPool[0].socket.emit("gameReset"), 3000)
     		playingUsersPool.splice(playingUsersPool.indexOf(usersOpponentInPool[0]), 1);
     	}
     	console.log("playingUsersPool now is at: " + playingUsersPool.length);
