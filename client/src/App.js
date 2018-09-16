@@ -44,7 +44,7 @@ class App extends Component {
           alert("You have won, congrats!");
           this.setState({userWon: true});   
         }
-        if (data.winner === "DRAW") {
+        else if (data.winner === "DRAW") {
           alert("Looks like its a draw here folks.");
         }
         else {

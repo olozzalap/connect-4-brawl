@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require('path');
 const http = require("http");
 const socketIo = require("socket.io");
 const axios = require("axios");
@@ -11,8 +12,13 @@ const User = require('./models/User');
 const Game = require('./models/Game');
 
 const app = express();
-app.use(index);
-app.use(bodyParser.json());
+// app.use(index);
+// app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'client/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
+
 const server = http.createServer(app);
 const io = socketIo(server);
 server.listen(port, () => console.log(`Listening on port ${port}`));
