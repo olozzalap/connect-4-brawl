@@ -124,62 +124,53 @@ class App extends Component {
           <h1>CONNECT4 Brawl</h1>
         </header>
         <main>
-          {user ? 
-            <div>
-              <h2>
-                Hello {user.name}, good luck!
-              </h2>
-              {opponent ? 
-                <div>
-                  {opponent.isTurn ?
-                    <p>Waiting on {opponent.name} to make a move!</p>
-                  : <p>Your opponent is {opponent.name}</p>}
-
-                  {userWon === true ?
-                    <div>
-                      <h1>You've won, great job!</h1>
-                      <button onClick={(e) => this.newMatch(e)}>
-                        Ready for a new match?
-                      </button>
-                    </div>
-                  : ""}
-                  {userWon === false ?
-                    <div>
-                      <h1>You've lost the brawl, dang!</h1>
-                      <button onClick={(e) => this.newMatch(e)}>
-                        Redemption?
-                      </button>
-                    </div>
-                  : ""}
-
-                  <section className={(opponent.isTurn || userWon === true || userWon === false) ? 'board grayed-out' : 'board'}>
-                    {this.parseBoardMarkup()}
-                  </section>
-
-                  <aside className="chat">
-                    <div className="chat-inner">
-                      <h2>Chat</h2>
-                      {this.parseChats()}
-                      <form onSubmit={(e) => this.sendChat(e)}>
-                        <label>
-                          Chat with {opponent.name}
-                          <textarea value={this.state.chatText} onChange={(e) => this.updateChatText(e)} ></textarea>
-                        </label>
-                        <input type="submit" value="Submit" />
-                      </form>
-                    </div>
-                  </aside>
-                </div>
-                : <h3> Waiting for an opponent, prepare for the brawl</h3>
-              }
+          {user ? <div>
+            {userWon === true ? <div>
+              <h1>You've won, great job!</h1>
+              <button onClick={(e) => this.newMatch(e)}>
+                Ready for a new match?
+              </button>
             </div>
-            :  <form onSubmit={(e) => this.createUser(e)}>
-                <label>
-                  Enter your name for the Brawl!:
-                  <input type="text" value={this.state.userNameText} onChange={(e) => this.updateUserNameText(e)} />
-                </label>
-                <input type="submit" value="Submit" />
-              </form>
+            : ""}
+            {userWon === false ? <div>
+              <h1>You've lost the brawl, dang!</h1>
+              <button onClick={(e) => this.newMatch(e)}>
+                Redemption?
+              </button>
+            </div>
+            : ""}
+            {userWon === null ? <h2>Hello {user.name}, good luck!</h2>
+            : ""}
+            {opponent ? <div>
+                {opponent.isTurn ? <p>Waiting on {opponent.name} to make a move!</p>
+                : <p>Your opponent is {opponent.name}</p>}
+              <section className={(opponent.isTurn || userWon === true || userWon === false) ? 'board grayed-out' : 'board'}>
+                {this.parseBoardMarkup()}
+              </section>
+
+              <aside className="chat">
+                <div className="chat-inner">
+                  <h2>Chat</h2>
+                  {this.parseChats()}
+                  <form onSubmit={(e) => this.sendChat(e)}>
+                    <label>
+                      Chat with {opponent.name}
+                      <textarea value={this.state.chatText} onChange={(e) => this.updateChatText(e)} ></textarea>
+                    </label>
+                    <input type="submit" value="Submit" />
+                  </form>
+                </div>
+              </aside>
+            </div>
+            : <h3> Waiting for an opponent, prepare for the brawl</h3>}
+          </div>
+          :  <form onSubmit={(e) => this.createUser(e)}>
+              <label>
+                Enter your name for the Brawl!:
+                <input type="text" value={this.state.userNameText} onChange={(e) => this.updateUserNameText(e)} />
+              </label>
+              <input type="submit" value="Submit" />
+            </form>
           }
         </main>
       </div>
