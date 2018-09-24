@@ -5,7 +5,6 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      endpoint: "http://127.0.0.1:4001",
       userNameText: '',
       chatText: '',
       user: null,
@@ -17,8 +16,7 @@ class App extends Component {
     };
   }
   componentDidMount() {
-    const { endpoint } = this.state;
-    this.socket = socketIOClient(endpoint);
+    this.socket = socketIOClient('http://localhost:4797');
     this.socket.on("userCreated", (data) => {
       console.log(data);
       this.setState({ user: data });
@@ -136,7 +134,7 @@ class App extends Component {
     return (
       <div>
         <header>
-          <h1>CONNECT4 Brawl</h1>
+          <h1>CONNECT-4 Brawl</h1>
         </header>
         <main>
           {user ? <div>

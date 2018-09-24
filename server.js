@@ -1,27 +1,27 @@
 const express = require("express");
 const path = require('path');
 const http = require("http");
-const socketIo = require("socket.io");
+const socketIO = require("socket.io");
 const axios = require("axios");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const index = require("./routes/index");
-const port = process.env.PORT || 4001;
+// Static port needed to ensure React frontend can connect to Socket.io when deployed
+const PORT = 4797;
 const db = require('./config/keys').mongoURI;
 const User = require('./models/User');
 const Game = require('./models/Game');
 
-const app = express();
-// app.use(index);
-// app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'client/build')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname+'/client/build/index.html'));
-});
+const server = express()
+  .use(express.static(path.join(__dirname, 'client/build')))
+  .get('*', (req, res) => {
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+  })
+  .listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
-const server = http.createServer(app);
-const io = socketIo(server);
-server.listen(port, () => console.log(`Listening on port ${port}`));
+// const server = http.createServer(app);
+const io = socketIO(server);
+
 mongoose.connect(db)
 	.then(() => console.log("MongoDB connected"))
 	.catch((err) => console.log(err))
