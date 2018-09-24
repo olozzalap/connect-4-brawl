@@ -6,22 +6,23 @@ const axios = require("axios");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const index = require("./routes/index");
+const PORT = process.env.PORT || 4000;
 // Static port needed to ensure React frontend can connect to Socket.io when deployed
-const PORT = 4797;
+const ioPort = 4797;
 const db = require('./config/keys').mongoURI;
 const User = require('./models/User');
 const Game = require('./models/Game');
-
+// Express server
 const server = express()
   .use(express.static(path.join(__dirname, 'client/build')))
   .get('*', (req, res) => {
     res.sendFile(path.join(__dirname+'/client/build/index.html'));
   })
   .listen(PORT, () => console.log(`Listening on port ${PORT}`));
-
-// const server = http.createServer(app);
-const io = socketIO(server);
-
+// Socket.io instance
+const io = socketIO();
+io.listen(ioPort);
+// MongoDB
 mongoose.connect(db)
 	.then(() => console.log("MongoDB connected"))
 	.catch((err) => console.log(err))

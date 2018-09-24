@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import socketIOClient from "socket.io-client";
+import io from "socket.io-client";
 
 class App extends Component {
   constructor() {
@@ -16,7 +16,7 @@ class App extends Component {
     };
   }
   componentDidMount() {
-    this.socket = socketIOClient('http://localhost:4797');
+    this.socket = io('http://localhost:4797');
     this.socket.on("userCreated", (data) => {
       console.log(data);
       this.setState({ user: data });
