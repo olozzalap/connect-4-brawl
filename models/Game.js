@@ -25,7 +25,7 @@ const GameSchema = new Schema({
 			required: true
 		}
 	}],
-	winner: {type: Schema.Types.ObjectId, ref: 'User'},
+	winner: {type: String},
 	createdAt: {
 		type: Date,
 		default: Date.now()

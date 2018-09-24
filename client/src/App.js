@@ -163,8 +163,10 @@ class App extends Component {
             {userWon === null ? <h2>Hello {user.name}, good luck!</h2>
             : ""}
             {opponent ? <div>
-                {opponent.isTurn ? <p>Waiting on {opponent.name} to make a move!</p>
-                : <p>Your opponent is {opponent.name}</p>}
+                {userWon === null ? <div>
+                  {opponent.isTurn ? <p>Waiting on {opponent.name} to make a move!</p>
+                  : <p>Your opponent is {opponent.name}</p>} </div>
+                : ""}
               <section className={(opponent.isTurn || userWon === true || userWon === false || userWon === "DRAW") ? 'board grayed-out' : 'board'}>
                 {this.parseBoardMarkup()}
               </section>
