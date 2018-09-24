@@ -13,11 +13,11 @@ const db = require('./config/keys').mongoURI;
 const User = require('./models/User');
 const Game = require('./models/Game');
 // Express server
-const app = express();
-// app.use(express.static(path.join(__dirname, 'client/build')))
-//   .get('/', (req, res) => {
-//     res.sendFile(path.join(__dirname+'/client/build/index.html'));
-//   })
+const app = express()
+  .use(express.static(path.join(__dirname, 'client/build')))
+  .get('/', (req, res) => {
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+  })
 
 const server = require('http').createServer(app);
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));

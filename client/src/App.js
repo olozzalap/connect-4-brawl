@@ -16,7 +16,7 @@ class App extends Component {
     };
   }
   componentDidMount() {
-    this.socket = io();
+    this.socket = io("https://pacific-meadow-25747.herokuapp.com/");
     this.socket.on("userCreated", (data) => {
       console.log(data);
       this.setState({ user: data });
