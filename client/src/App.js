@@ -40,10 +40,11 @@ class App extends Component {
         console.log("You are: " + this.state.user._id);
         if (data.winner === this.state.user._id) {
           alert("You have won, congrats!");
-          this.setState({userWon: true});   
+          this.setState({userWon: true});
         }
         else if (data.winner === "DRAW") {
           alert("Looks like its a draw here folks.");
+          this.setState({userWon: "DRAW"});
         }
         else {
           alert("You have lost to " + this.state.opponent.name + "...");
