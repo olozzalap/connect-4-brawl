@@ -16,7 +16,7 @@ class App extends Component {
     };
   }
   componentDidMount() {
-    this.socket = io('http://localhost:4797');
+    this.socket = io();
     this.socket.on("userCreated", (data) => {
       console.log(data);
       this.setState({ user: data });

@@ -13,15 +13,18 @@ const db = require('./config/keys').mongoURI;
 const User = require('./models/User');
 const Game = require('./models/Game');
 // Express server
-const server = express()
-  .use(express.static(path.join(__dirname, 'client/build')))
-  .get('*', (req, res) => {
-    res.sendFile(path.join(__dirname+'/client/build/index.html'));
-  })
-  .listen(PORT, () => console.log(`Listening on port ${PORT}`));
+const app = express();
+// app.use(express.static(path.join(__dirname, 'client/build')))
+//   .get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname+'/client/build/index.html'));
+//   })
+
+const server = require('http').createServer(app);
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 // Socket.io instance
-const io = socketIO();
-io.listen(ioPort);
+const io = require("socket.io")(server);
+
+// io.listen(ioPort);
 // MongoDB
 mongoose.connect(db)
 	.then(() => console.log("MongoDB connected"))
