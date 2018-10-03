@@ -1,8 +1,8 @@
-# connect-4-brawl
-Live anonymously-matched Connect 4 games
+# CONNECT-4 Brawl
+Live anonymously-matched Connect 4 games, hosted on Heroku at [pacific-meadow-25747.herokuapp.com](https://pacific-meadow-25747.herokuapp.com/ "CONNECT-4 Brawl")
 
 
-## To run server
+## To run local server
 - Run `npm run start`
 - `cd /client`
 - Run `npm start`
