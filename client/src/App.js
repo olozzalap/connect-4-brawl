@@ -55,8 +55,8 @@ class App extends Component {
     this.socket.on("newChat", (data) => {
       console.log(data);
       console.log(this.state.chats);
-      let newChats = this.state.chats;
-      newChats.push(data);
+      let newChats = this.state.chats.slice();
+      newChats.unshift(data);
       this.setState({ chats: newChats});
       console.log(this.state.chats);
     });
@@ -109,7 +109,12 @@ class App extends Component {
   parseChats() {
     let chatsArr = [];
     for (let i = 0; i < this.state.chats.length; i++) {
-      chatsArr.push(<div style={{clear: "both"}} key={this.state.chats[i].userId + this.state.chats[i].text}><p className={this.state.chats[i].userId === this.state.opponent.userId ? 'opponents' : 'users'}>{this.state.chats[i].text}</p></div>)
+      chatsArr.push(<div style={{clear: "both"}} key={this.state.chats[i].userId + this.state.chats[i].text + this.state.chats[i].date}>
+        <p className={this.state.chats[i].userId === this.state.opponent.userId ? 'opponents' : 'users'}>
+          <i className="timestamp">{new Date(this.state.chats[i].date).toLocaleTimeString()}</i>
+          {this.state.chats[i].text}
+        </p>
+      </div>)
     }
     return chatsArr;
   }
@@ -120,7 +125,12 @@ class App extends Component {
   }
   sendChat(event) {
     event.preventDefault();
-    this.socket.emit('sendChat', {text: this.state.chatText, userId: this.state.user._id, gameId: this.state.gameId}); 
+    this.socket.emit('sendChat', {
+      date: Date.now(),
+      text: this.state.chatText, 
+      userId: this.state.user._id, 
+      gameId: this.state.gameId
+    }); 
     this.setState({chatText: ""});
   }
   newMatch(event) {
@@ -165,15 +175,15 @@ class App extends Component {
             {opponent ? <div>
                 {userWon === null ? <div>
                   {opponent.isTurn ? <p>Waiting on {opponent.name} to make a move!</p>
-                  : <p>Your opponent is {opponent.name}</p>} </div>
+                  : <p>It's your move and your opponent is {opponent.name}</p>} </div>
                 : ""}
               <section className={(opponent.isTurn || userWon === true || userWon === false || userWon === "DRAW") ? 'board grayed-out' : 'board'}>
                 {this.parseBoardMarkup()}
               </section>
 
               <aside className="chat">
+                <h2>Chat</h2>
                 <div className="chat-inner">
-                  <h2>Chat</h2>
                   {this.parseChats()}
                   <form onSubmit={(e) => this.sendChat(e)}>
                     <label>

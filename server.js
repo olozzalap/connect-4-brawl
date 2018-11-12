@@ -75,7 +75,11 @@ io.on("connection", socket => {
     	let usersOpponentInPool = playingUsersPool.filter( (user) => user.user._id === sendingUserInPool[0].opponentId);
     	// Gracefully send a message to the disconnected users opponent and then reset them back to waiting for an opponent after 4 seconds
     	if (usersOpponentInPool[0]) {
-    		usersOpponentInPool[0].socket.emit("newChat", {userId: "admin", text: "Your opponent left the match so you win by forfeit. We automatically added you back to the queue for the next match"});
+    		usersOpponentInPool[0].socket.emit("newChat", {
+          userId: "admin", 
+          text: "Your opponent left the match so you win by forfeit. We automatically added you back to the queue for the next match",
+          date: Date.now()
+        });
     		setTimeout(() => usersOpponentInPool[0].socket.emit("gameReset"), 4000)
     		playingUsersPool.splice(playingUsersPool.indexOf(usersOpponentInPool[0]), 1);
     	}
