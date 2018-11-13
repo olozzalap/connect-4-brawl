@@ -1,5 +1,5 @@
 # CONNECT-4 Brawl
-Live anonymously-matched Connect 4 games, hosted on Heroku at [pacific-meadow-25747.herokuapp.com](https://pacific-meadow-25747.herokuapp.com/ "CONNECT-4 Brawl")
+Live anonymously-matched Connect 4 games with chat, hosted on Heroku at [https://connect4.fun/](https://connect4.fun// "CONNECT-4 Brawl")
 
 
 ## To run local server
