@@ -1,5 +1,5 @@
-# CONNECT-4 Brawl
-Live anonymously-matched Connect 4 games with chat, hosted on Heroku at [https://connect4.fun/](https://connect4.fun// "CONNECT-4 Brawl")
+# Connect 4 Brawl
+Live anonymously-matched Connect 4 games with chat, hosted on Heroku at <a href="https://connect4.fun/" target="_blank">https://connect4.fun/</a>
 
 
 ## To run local server
