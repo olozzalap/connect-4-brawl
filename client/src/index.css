@@ -8,9 +8,7 @@ body {
 }
 input, textarea, select, button {
 	font-size: 16px;
-}
-input {
-	border: 2px black solid;
+	border: 1.5px black solid;
 }
 h1, h2, h3 {
 	font-family: 'Chicle', cursive;
