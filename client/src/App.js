@@ -206,6 +206,11 @@ class App extends Component {
             </form>
           }
         </main>
+        <footer>
+          <p>
+            Made with ❤ by <a href="https://olozzalap.com/" target="_blank">Eben Palazzolo</a>
+          </p>
+        </footer>
       </div>
     );
   }

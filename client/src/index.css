@@ -10,6 +10,16 @@ input, textarea, select, button {
 	font-size: 16px;
 	border: 1.5px black solid;
 }
+a {
+	text-decoration: none;
+	transition: .25s;
+}
+a:link, a:visited {
+	color: rgb(49, 147, 248);
+}
+a:hover {
+	color: rgb(244, 42, 58);
+}
 h1, h2, h3 {
 	font-family: 'Chicle', cursive;
 	letter-spacing: 1.2px;
@@ -21,9 +31,24 @@ h1 {
 h2 {
 	margin-bottom: 8px;
 }
+header, footer {
+	background-color: rgba(240, 230, 248, .5);
+}
 header {
 	padding: 12px 5%;
-	background-color: rgba(240, 230, 248, .5);
+}
+footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	text-align: right;
+	padding: 4px 3%;
+	font-style: italic;
+}
+footer p {
+	margin: 0;
 }
 main {
 	padding: 0 250px 50px 2%;
@@ -58,7 +83,7 @@ main {
 	left: 0;
 	right: 0;
 	background-color: rgba(240, 230, 248, .8);
-	z-index: 9999;
+	z-index: 90;
 
 }
 .board-column {
@@ -96,7 +121,7 @@ main {
 /* Chat sidebar */
 .chat {
 	position: fixed;
-	z-index: 9999;
+	z-index: 90;
 	right: 0;
 	top: 18vh;
 	bottom: 18vh;
