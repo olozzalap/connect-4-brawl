@@ -49,7 +49,7 @@ main {
 	border: 4px solid rgba(49, 147, 248, .8);
 	clear: both;
 	height: 71vw;
-	max-height: 705px;
+	max-height: 650px;
 	position: relative;
 }
 .board.grayed-out:before, .board-column.full-column:before {
