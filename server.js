@@ -6,6 +6,7 @@ const axios = require("axios");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const index = require("./routes/index");
+require('dotenv').config();
 const PORT = process.env.PORT || 4000;
 // Static port needed to ensure React frontend can connect to Socket.io when deployed
 const ioPort = 4797;
@@ -24,7 +25,6 @@ server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 // Socket.io instance
 const io = require("socket.io")(server);
 
-// io.listen(ioPort);
 // MongoDB
 mongoose.connect(db)
 	.then(() => console.log("MongoDB connected"))
